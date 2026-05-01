@@ -11,7 +11,7 @@ from saviialib import SaviiaAPI, SaviiaAPIConfig
 
 from custom_components.saviia.const import GeneralParams
 from custom_components.saviia.storage import SaviiaStorage
-from custom_components.saviia.websocket_api import ws_get_people
+from custom_components.saviia.websocket import ws_get_people
 
 from .coordinator import (
     LocalBackupCoordinator,
