@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from homeassistant.components import websocket_api
 from homeassistant.components.frontend import async_register_built_in_panel
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
@@ -9,6 +10,8 @@ from homeassistant.core import HomeAssistant
 from saviialib import SaviiaAPI, SaviiaAPIConfig
 
 from custom_components.saviia.const import GeneralParams
+from custom_components.saviia.storage import SaviiaStorage
+from custom_components.saviia.websocket_api import ws_get_people
 
 from .coordinator import (
     LocalBackupCoordinator,
@@ -237,6 +240,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                     metadata={"msg": f"Error registering frontend: {e!s}"},
                 )
             )
+    # Initialize entry-scoped storage component.
+    storage = SaviiaStorage(hass, config_entry.entry_id)
+    hass.data[GeneralParams.DOMAIN][config_entry.entry_id]["storage"] = storage
+
+    # Register websocket command only once for the whole domain.
+    if not hass.data[GeneralParams.DOMAIN].get("websocket_registered"):
+        websocket_api.async_register_command(hass, ws_get_people)
+        hass.data[GeneralParams.DOMAIN]["websocket_registered"] = True
     return True
 
 

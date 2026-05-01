@@ -114,6 +114,20 @@ class ServicesParams:
         }
     )
 
+    SERVICE_ADD_PERSON = "add_person"
+    SERVICE_ADD_PERSON_SCHEMA = vol.Schema(
+        {
+            vol.Required("person"): vol.Schema(
+                {
+                    vol.Required("id"): cv.string,
+                    vol.Required("name"): cv.string,
+                    vol.Required("email"): cv.string,
+                    vol.Optional("discord"): cv.string,
+                }
+            ),
+        }
+    )
+
 
 class ConfigDefaultsParams:
     """Config flow default parameters."""

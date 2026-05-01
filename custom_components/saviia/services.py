@@ -506,6 +506,31 @@ async def async_get_pending_tasks(call: ServiceCall) -> ServiceResponse:
         raise
 
 
+async def async_add_person(call: ServiceCall) -> ServiceResponse:
+    """Store a person in local SAVIIA storage."""
+    logclient.method_name = "async_add_person"
+    logclient.debug(DebugArgs(status=LogStatus.STARTED))
+    _ensure_domain_setup(call.hass)
+    person = call.data["person"]
+
+    for entry_id in call.hass.data[GeneralParams.DOMAIN]:
+        if entry_id in {"services_registered", "websocket_registered"}:
+            continue
+        storage = call.hass.data[GeneralParams.DOMAIN][entry_id]["storage"]
+        await storage.async_add_person(person)
+
+    logclient.info(
+        InfoArgs(
+            status=LogStatus.SUCCESSFUL,
+            metadata={"msg": f"Person '{person['id']}' added successfully"},
+        )
+    )
+    return {
+        "status": "success",
+        "person": person,
+    }
+
+
 async def async_setup_services(hass: HomeAssistant) -> None:
     """Set up services for the SAVIIA integration."""
     hass.services.async_register(
@@ -577,6 +602,14 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         supports_response=SupportsResponse.ONLY,
     )
 
+    hass.services.async_register(
+        GeneralParams.DOMAIN,
+        ServicesParams.SERVICE_ADD_PERSON,
+        async_add_person,
+        schema=ServicesParams.SERVICE_ADD_PERSON_SCHEMA,
+        supports_response=SupportsResponse.ONLY,
+    )
+
 
 async def async_unload_services(hass: HomeAssistant) -> None:
     """Unload services for the SAVIIA integration."""
@@ -600,3 +633,4 @@ async def async_unload_services(hass: HomeAssistant) -> None:
     hass.services.async_remove(
         GeneralParams.DOMAIN, ServicesParams.SERVICE_GET_CONFIG_VALUE
     )
+    hass.services.async_remove(GeneralParams.DOMAIN, ServicesParams.SERVICE_ADD_PERSON)
