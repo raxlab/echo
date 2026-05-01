@@ -56,6 +56,24 @@ export default class TasksAPI {
             throw new Error(`Home Assistant service error: ${error.message}`);
         }
     }
+    async _callWSWithErrorHandling(message) {
+        try {
+            if (!this.hass) {
+                throw new Error("Home Assistant instance is not available");
+            }
+
+            logger.debug("WS call started", message);
+
+            const result = await this.hass.callWS(message);
+
+            logger.debug("WS call succeeded", { result });
+
+            return result;
+        } catch (error) {
+            logger.error("WS call failed", { message, error: error.message });
+            throw new Error(`WebSocket error: ${error.message}`);
+        }
+    }
     async _fetchWithErrorHandling(url, options = {}) {
         try {
             logger.debug("HTTP request started", { url, method: options.method ?? "GET" });
@@ -186,6 +204,36 @@ export default class TasksAPI {
             const value = result.service_response.value
             logger.info('Config flow value fetched via hass service', { key, value });
             return value;
+        }
+    }
+    async getPeople() {
+        logger.info("Fetching people");
+
+        if (this.environment === "development") {
+            // 🔧 opción simple: mock temporal
+            logger.warn("Using mock people in development");
+            return [
+                {
+                    id: "juan",
+                    name: "Juan Pérez",
+                    email: "juan@mail.com",
+                    discord: "juan#1234"
+                },
+                {
+                    id: "ana",
+                    name: "Ana Soto",
+                    email: "ana@mail.com",
+                    discord: null
+                }
+            ];
+        } else {
+            const people = await this._callWSWithErrorHandling({
+                type: "saviia/get_people"
+            });
+
+            logger.info("People fetched via websocket", { count: people.length });
+
+            return people;
         }
     }
 }

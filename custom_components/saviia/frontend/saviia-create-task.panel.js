@@ -16,12 +16,15 @@ export class SaviiaCreateTask extends LitElement {
 
     if (!this._initialized && hass) {
       this._initialized = true;
+      // Fetch people stored in HA via websocket
+      this._fetchPeople();
     }
   }
   static properties = {
     hass: { type: Object },
     images: { state: true },
-    isSubmitting: { state: true }
+    isSubmitting: { state: true },
+    people: { state: true }
   };
 
   constructor() {
@@ -29,9 +32,36 @@ export class SaviiaCreateTask extends LitElement {
     this.images = [];
     this.tasksAPI = new TasksAPI();
     this.isSubmitting = false;
+    this.people = [];
     this.CONFIG = {
       ACCEPTED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/gif"],
     };
+  }
+
+  async _fetchPeople() {
+    try {
+      const people = await this.tasksAPI.getPeople();
+      console.log("Fetched people:", people);
+      if (Array.isArray(people)) this.people = people;
+    } catch (err) {
+      logger.error("Error fetching people via TasksAPI:", err);
+      this.people = [];
+    }
+  }
+
+  _onPersonSelected(e) {
+    const idx = e.target.value;
+    if (!idx) return;
+    const person = this.people.find((p) => p.id == idx) || this.people[idx];
+    if (!person) return;
+    // Populate form fields
+    const form = this.renderRoot?.querySelector?.("form") || document;
+    const assigneeInput = form.querySelector("#assignee");
+    const emailInput = form.querySelector("#assignee_email");
+    const discordInput = form.querySelector("#assignee_discord_username");
+    if (assigneeInput) assigneeInput.value = person.name || "";
+    if (emailInput) emailInput.value = person.email || "";
+    if (discordInput) discordInput.value = person.discord || "";
   }
 
   static styles = new Styles().getStyles(['general', 'form', 'alert'])
@@ -196,6 +226,16 @@ export class SaviiaCreateTask extends LitElement {
 
     <fieldset>
       <legend>Detalles del responsable de la tarea</legend>
+      <label>
+        <p>Seleccionar persona</p>
+        <i>Elige una persona almacenada en Saviia (autocompleta el formulario).</i>
+        <select id="people-select" @change=${this._onPersonSelected}>
+          <option value="">-- Manual --</option>
+          ${this.people.map(
+            (p) => html`<option value="${p.id}">${p.name} ${p.email ? `(${p.email})` : ""}</option>`
+          )}
+        </select>
+      </label>
       <label>
         <p>Persona asignada <span style="color: #03a9f4">*</span> </p>
         <i>La persona responsable de realizar esta tarea.</i>

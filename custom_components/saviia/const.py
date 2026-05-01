@@ -128,6 +128,13 @@ class ServicesParams:
         }
     )
 
+    SERVICE_DELETE_PERSON = "delete_person"
+    SERVICE_DELETE_PERSON_SCHEMA = vol.Schema(
+        {
+            vol.Required("id"): cv.string,
+        }
+    )
+
 
 class ConfigDefaultsParams:
     """Config flow default parameters."""
