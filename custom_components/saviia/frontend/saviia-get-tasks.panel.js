@@ -3,6 +3,7 @@ import {
     html,
 } from "https://unpkg.com/lit-element@2.4.0/lit-element.js?module";
 
+import { unsafeHTML } from 'https://unpkg.com/lit-html@1.4.1/directives/unsafe-html.js?module';
 import { Styles } from './styles/index.js';
 import TasksAPI from './endpoints/tasks.endpoints.js';
 import { createLogger } from './services/logger.js';
@@ -384,6 +385,10 @@ class SaviiaGetTasks extends LitElement {
 
     renderModalViewMode() {
         if (!this.selectedTask) return html``;
+        const rawDesc = this.selectedTask.description || '';
+        const escapedDesc = this.escapeHtml(rawDesc);
+        const descWithBreaks = escapedDesc.replace(/\n/g, '<br>');
+
         return html`
             <h2 class="modal-task-title">${this.escapeHtml(this.selectedTask.title)}</h2>
             <div class="modal-task-field">
@@ -434,7 +439,7 @@ class SaviiaGetTasks extends LitElement {
             </div>
             <div class="modal-task-field">
                 <label class="modal-task-field-label">Descripción</label>
-                <div class="modal-task-field-value">${this.escapeHtml(this.selectedTask.description)}</div>
+                <div class="modal-task-field-value">${unsafeHTML(descWithBreaks)}</div>
             </div>
             ${this.modalEmbeds && this.modalEmbeds.length > 0 ? html`
                 <div class="modal-task-images">
