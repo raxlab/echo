@@ -1,16 +1,16 @@
 {
     "domain": "saviia",
-    "name": "SAVIIA",
+    "name": "ECHO",
     "codeowners": [
         "@pedrozavalat",
         "@raxlab"
     ],
     "config_flow": true,
     "dependencies": ["http"],
-    "documentation": "https://github.com/raxlab/saviia",
+    "documentation": "https://github.com/raxlab/echo",
     "integration_type": "service",
     "iot_class": "cloud_polling",
-    "issue_tracker": "https://github.com/raxlab/saviia/issues",
+    "issue_tracker": "https://github.com/raxlab/echo/issues",
     "requirements": [
         "saviialib==1.19.1"
     ],
