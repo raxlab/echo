@@ -1,23 +1,22 @@
-changelog:
-  categories:
-    - title: 🚀 Features
-      labels:
-        - feature
-        - enhancement
-    - title: 🐛 Fixes
-      labels:
-        - bug
-        - fix
-    - title: ⚡ Performance
-      labels:
-        - performance
-    - title: 🧰 Maintenance
-      labels:
-        - chore
-        - dependencies
-    - title: 📚 Documentation
-      labels:
-        - docs
 template: |
   ## What’s Changed
   $CHANGES
+categories:
+  - title: 🚀 Features
+    labels:
+      - feature
+      - enhancement
+  - title: 🐛 Fixes
+    labels:
+      - bug
+      - fix
+  - title: ⚡ Performance
+    labels:
+      - performance
+  - title: 🧰 Maintenance
+    labels:
+      - chore
+      - dependencies
+  - title: 📚 Documentation
+    labels:
+      - docs
