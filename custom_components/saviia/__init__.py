@@ -14,9 +14,7 @@ from custom_components.saviia.storage import SaviiaStorage
 from custom_components.saviia.websocket import ws_get_people
 
 from .coordinator import (
-    LocalBackupCoordinator,
     NetcameraRatesCoordinator,
-    SyncThiesDataCoordinator,
 )
 from .libs.log_client import (
     DebugArgs,
@@ -59,10 +57,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     logclient.debug(DebugArgs(status=LogStatus.STARTED))
     api = SaviiaAPI(
         SaviiaAPIConfig(
-            ftp_port=config_entry.data["ftp_port"],
-            ftp_host=config_entry.data["ftp_host"],
-            ftp_user=config_entry.data["ftp_user"],
-            ftp_password=config_entry.data["ftp_password"],
             sharepoint_client_id=config_entry.data["sharepoint_client_id"],
             sharepoint_client_secret=config_entry.data["sharepoint_client_secret"],
             sharepoint_tenant_id=config_entry.data["sharepoint_tenant_id"],
@@ -81,18 +75,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(GeneralParams.DOMAIN, {})
     hass.data[GeneralParams.DOMAIN].setdefault(config_entry.entry_id, {})
     hass.data[GeneralParams.DOMAIN][config_entry.entry_id]["api"] = api
-    coordinator_parameters = (
+    netcamera_rates_coordinator = NetcameraRatesCoordinator(
         hass,
         config_entry,
         api,
     )
-    thies_coordinator = SyncThiesDataCoordinator(*coordinator_parameters)
-    backup_coordinator = LocalBackupCoordinator(*coordinator_parameters)
-    netcamera_rates_coordinator = NetcameraRatesCoordinator(*coordinator_parameters)
 
     try:
-        await thies_coordinator.async_config_entry_first_refresh()
-        await backup_coordinator.async_config_entry_first_refresh()
         await netcamera_rates_coordinator.async_config_entry_first_refresh()
 
     except ValueError as ve:
@@ -127,12 +116,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             )
         )
         return False
-    hass.data[GeneralParams.DOMAIN][config_entry.entry_id][thies_coordinator.name] = (
-        thies_coordinator
-    )
-    hass.data[GeneralParams.DOMAIN][config_entry.entry_id][backup_coordinator.name] = (
-        backup_coordinator
-    )
     hass.data[GeneralParams.DOMAIN][config_entry.entry_id][
         netcamera_rates_coordinator.name
     ] = netcamera_rates_coordinator
@@ -230,7 +213,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 logclient.debug(
                     DebugArgs(
                         status=LogStatus.SUCCESSFUL,
-                        metadata={"msg": "Frontend registered at /saviia-sensor-status"},
+                        metadata={
+                            "msg": "Frontend registered at /saviia-sensor-status"
+                        },
                     )
                 )
         except Exception as e:  # noqa: BLE001

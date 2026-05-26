@@ -1,7 +1,87 @@
-sync_thies_files:
-  name: "Synchronize Thies Files"
-  description: "Initiates file synchronization with the FTP server and cloud storage."
-  fields: {}
+get_thies_data:
+  name: "Get Thies Data"
+  description: "Reads the configured THIES credentials and returns whether a sync or backup is needed."
+  fields:
+    ftp_port:
+      name: FTP port override
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 65535
+    ftp_host:
+      name: FTP host override
+      required: true
+      selector:
+        text:
+    ftp_user:
+      name: FTP user override
+      required: true
+      selector:
+        text:
+    ftp_password:
+      name: FTP password override
+      required: true
+      selector:
+        text:
+    sharepoint_destination_path:
+      name: SharePoint destination override
+      description: "Defaults to the configured THIES AVG backup folder."
+      required: false
+      selector:
+        text:
+
+post_thies_data:
+  name: "Post Thies Data"
+  description: "Executes THIES backup and synchronization using the configured credentials."
+  fields:
+    ftp_port:
+      name: FTP port override
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 65535
+    ftp_host:
+      name: FTP host override
+      required: true
+      selector:
+        text:
+    ftp_user:
+      name: FTP user override
+      required: true
+      selector:
+        text:
+    ftp_password:
+      name: FTP password override
+      required: true
+      selector:
+        text:
+    need_to_sync:
+      name: Force sync flag
+      required: false
+      selector:
+        boolean:
+    need_to_backup:
+      name: Force backup flag
+      required: false
+      selector:
+        boolean:
+    sharepoint_destination_path:
+      name: SharePoint destination override
+      required: false
+      selector:
+        text:
+    ftp_server_folders_path:
+      name: FTP server folders override
+      required: false
+      selector:
+        object:
+    local_backup_source_path:
+      name: Local backup source override
+      required: false
+      selector:
+        text:
 
 detect_failures:
   name: "Detect failures from Thies Sensors"
@@ -45,10 +125,21 @@ detect_failures:
         selector:
           text:
 
-sync_local_backup:
-  name: "Execute Local backup for extracted files"
-  description: "Initiates a file backup which are uploaded in Filebrowser and moved to Sharepoint folder "
-  fields: {}
+export_files:
+  name: "Export Files"
+  description: "Synchronizes a local folder under the configured backup root with SharePoint."
+  fields:
+    local_folder_path:
+      name: Local folder path
+      description: "Relative folder under the configured backup root."
+      required: true
+      selector:
+        text:
+    sharepoint_destination_path:
+      name: SharePoint destination override
+      required: false
+      selector:
+        text:
 
 get_netcamera_rates:
   name: "Get Camera Time Rates"

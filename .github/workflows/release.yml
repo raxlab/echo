@@ -1,11 +1,20 @@
 name: "Release"
 
 on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional tag to package, for example v7.6.8"
+        required: false
+        type: string
   release:
     types: [published]
+  push:
+    tags:
+      - "v*"
 
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
   release:
@@ -15,26 +24,35 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Extract version from release
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
-          VERSION=$(echo "${GITHUB_REF#refs/tags/}" | sed 's/^v//')
+          TAG_NAME="${RELEASE_TAG:-${GITHUB_REF_NAME}}"
+          VERSION="${TAG_NAME#v}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
 
-      - name: Install dependencies
+      - name: Update manifest version
         run: |
-          sudo apt-get update
-          sudo apt-get install -y yq zip jq
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
 
-      - name: Adjust version number
-        run: |
-          jq --arg ver "$VERSION" '.version = $ver' custom_components/saviia/manifest.json > tmp.json && mv tmp.json custom_components/saviia/manifest.json
+          manifest = Path("custom_components/saviia/manifest.json")
+          data = json.loads(manifest.read_text())
+          data["version"] = os.environ["VERSION"]
+          manifest.write_text(json.dumps(data, indent=4) + "\n")
+          PY
 
-      - name: ZIP the integration directory
+      - name: Package the integration
         run: |
-          cd custom_components/saviia
-          zip saviia-${VERSION}.zip -r ./
+          zip -r "saviia-${VERSION}.zip" custom_components/saviia -x "custom_components/saviia/*.zip"
 
       - name: Upload the ZIP file to the release
         uses: softprops/action-gh-release@v2.2.2
         with:
-          files: custom_components/saviia/saviia-${{ env.VERSION }}.zip
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.TAG_NAME }}
+          files: saviia-${{ env.VERSION }}.zip
           generate_release_notes: true
