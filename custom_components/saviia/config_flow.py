@@ -51,8 +51,6 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
                 vol.Required(
                     "sharepoint_site_name",
                 ): str,  # THIES Data Logger Parameters
-                vol.Required("thies_ftp_server_avg_path"): str,
-                vol.Required("thies_ftp_server_ext_path"): str,
                 vol.Required("sharepoint_avg_backup_folder_name"): str,
                 vol.Required(
                     "sharepoint_ext_backup_folder_name"
