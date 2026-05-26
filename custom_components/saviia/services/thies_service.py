@@ -92,3 +92,35 @@ class ThiesService:
             results.append({"entry_id": config_entry.entry_id, **result})
 
         return _format_multi_entry_response(results)
+
+    async def async_detect_failures(self, call: ServiceCall) -> ServiceResponse:
+        """Detect failures in THIES backups based on local backup and DB params."""
+        logclient.method_name = "async_detect_failures"
+        logclient.debug(DebugArgs(status=LogStatus.STARTED))
+        _ensure_domain_setup(call.hass)
+
+        results: list[dict] = []
+        for config_entry, entry_data in _iter_config_entry_contexts(call.hass):
+            api: SaviiaAPI = entry_data["api"]
+            thies_service = api.get("thies")
+
+            local_backup_source_path = call.data["local_backup_source_path"]
+            n_days = call.data["n_days"]
+            db_driver = call.data.get("db_driver")
+            db_host = call.data.get("db_host")
+            db_name = call.data.get("db_name")
+            user = call.data.get("user")
+            pwd = call.data.get("pwd")
+
+            result = await thies_service.detect_failures(
+                local_backup_source_path=local_backup_source_path,
+                n_days=n_days,
+                db_driver=db_driver,
+                db_host=db_host,
+                db_name=db_name,
+                user=user,
+                pwd=pwd,
+            )
+            results.append({"entry_id": config_entry.entry_id, **result})
+
+        return _format_multi_entry_response(results)

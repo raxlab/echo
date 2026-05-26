@@ -36,12 +36,9 @@ class NetcameraService:
         api: SaviiaAPI = _check_api_in_entry(call.hass)
         camera_services = api.get("netcamera")
         try:
-            latitude = call.data.get("latitude")
-            longitude = call.data.get("longitude")
-            result = await camera_services.get_camera_rates(
-                latitude=latitude,
-                longitude=longitude,
-            )
+            # The underlying API instance uses its configured latitude/longitude.
+            # Ignore any latitude/longitude passed via the service call.
+            result = await camera_services.get_camera_rates()
             if result.get("status") != HTTPStatus.OK.value:
                 logclient.error(
                     ErrorArgs(

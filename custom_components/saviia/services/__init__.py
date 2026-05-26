@@ -53,6 +53,11 @@ class SaviiaServiceRegistry:
             ServicesParams.SERVICE_POST_THIES_DATA_SCHEMA,
         )
         self._register(
+            ServicesParams.SERVICE_DETECT_FAILURES,
+            self._thies_service.async_detect_failures,
+            ServicesParams.SERVICE_DETECT_FAILURES_SCHEMA,
+        )
+        self._register(
             ServicesParams.SERVICE_EXPORT_FILES,
             self._backup_service.async_export_files,
             ServicesParams.SERVICE_EXPORT_FILES_SCHEMA,
@@ -108,6 +113,7 @@ class SaviiaServiceRegistry:
         for service_name in (
             ServicesParams.SERVICE_GET_THIES_DATA,
             ServicesParams.SERVICE_POST_THIES_DATA,
+            ServicesParams.SERVICE_DETECT_FAILURES,
             ServicesParams.SERVICE_EXPORT_FILES,
             ServicesParams.SERVICE_GET_NETCAMERA_RATES,
             ServicesParams.SERVICE_UPDATE_TASK,
