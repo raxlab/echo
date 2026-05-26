@@ -79,8 +79,8 @@ class ServicesParams:
     SERVICE_GET_NETCAMERA_RATES = "get_netcamera_rates"
     SERVICE_GET_NETCAMERA_RATES_SCHEMA = vol.Schema(
         {
-            vol.Required("latitude"): cv.latitude,
-            vol.Required("longitude"): cv.longitude,
+            vol.Optional("latitude"): cv.latitude,
+            vol.Optional("longitude"): cv.longitude,
         }
     )
     SERVICE_UPDATE_TASK = "update_task"
