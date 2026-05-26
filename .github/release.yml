@@ -18,3 +18,6 @@ changelog:
     - title: 📚 Documentation
       labels:
         - docs
+template: |
+  ## What’s Changed
+  $CHANGES
