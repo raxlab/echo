@@ -31,8 +31,6 @@ class ServicesParams:
 
     ALLOWED_CONFIG_KEYS = frozenset(
         {
-            "ftp_host",
-            "ftp_port",
             "sharepoint_tenant_name",
             "sharepoint_site_name",
             "thies_ftp_server_avg_path",
@@ -46,11 +44,39 @@ class ServicesParams:
         }
     )
 
-    SERVICE_SYNC_FILES = "sync_files"
-    SERVICE_SYNC_FILES_SCHEMA = vol.Schema({})
+    SERVICE_GET_THIES_DATA = "get_thies_data"
+    SERVICE_GET_THIES_DATA_SCHEMA = vol.Schema(
+        {
+            vol.Required("ftp_port"): int,
+            vol.Required("ftp_host"): cv.string,
+            vol.Required("ftp_user"): cv.string,
+            vol.Required("ftp_password"): cv.string,
+            vol.Optional("sharepoint_destination_path"): cv.string,
+        }
+    )
 
-    SERVICE_LOCAL_BACKUP = "sync_local_backup"
-    SERVICE_LOCAL_BACKUP_SCHEMA = vol.Schema({})
+    SERVICE_EXPORT_FILES = "export_files"
+    SERVICE_EXPORT_FILES_SCHEMA = vol.Schema(
+        {
+            vol.Required("local_folder_path"): cv.string,
+            vol.Optional("sharepoint_destination_path"): cv.string,
+        }
+    )
+
+    SERVICE_POST_THIES_DATA = "post_thies_data"
+    SERVICE_POST_THIES_DATA_SCHEMA = vol.Schema(
+        {
+            vol.Required("ftp_port"): int,
+            vol.Required("ftp_host"): cv.string,
+            vol.Required("ftp_user"): cv.string,
+            vol.Required("ftp_password"): cv.string,
+            vol.Optional("need_to_sync"): bool,
+            vol.Optional("need_to_backup"): bool,
+            vol.Optional("sharepoint_destination_path"): cv.string,
+            vol.Optional("ftp_server_folders_path"): list,
+            vol.Optional("local_backup_source_path"): cv.string,
+        }
+    )
 
     SERVICE_GET_NETCAMERA_RATES = "get_netcamera_rates"
     SERVICE_GET_NETCAMERA_RATES_SCHEMA = vol.Schema(

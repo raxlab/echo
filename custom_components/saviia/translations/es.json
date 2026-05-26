@@ -1,12 +1,16 @@
 {
     "services": {
-        "sync_thies_files": {
-            "name": "Sincronizar Archivos de Thies",
-            "description": "Inicia la sincronización de archivos con el servidor FTP y el almacenamiento en la nube."
+        "get_thies_data": {
+            "name": "Obtener datos de THIES",
+            "description": "Lee las credenciales configuradas de THIES y devuelve el estado de sincronización y backup."
         },
-        "sync_local_backup": {
-            "name": "Ejecutar Backup local para los archivos extraídos.",
-            "description": "Inicia el backup de los archivos que fueron subidos en FileBrowser y que serán subidos a la carpeta de SharePoint."
+        "post_thies_data": {
+            "name": "Enviar datos de THIES",
+            "description": "Ejecuta el backup y la sincronización de THIES usando las credenciales configuradas."
+        },
+        "export_files": {
+            "name": "Exportar archivos",
+            "description": "Sincroniza una carpeta local bajo el backup configurado con SharePoint."
         }
     }
 }

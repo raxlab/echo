@@ -37,17 +37,6 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
         return vol.Schema(
             {
                 vol.Required(
-                    "ftp_host",
-                    default="localhost",
-                ): str,
-                vol.Required("ftp_port", default=21): int,
-                vol.Required(
-                    "ftp_user",
-                ): str,
-                vol.Required(
-                    "ftp_password",
-                ): str,
-                vol.Required(
                     "sharepoint_client_id",
                 ): str,
                 vol.Required(
@@ -88,13 +77,6 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                # Validate FTP port
-                ftp_port = user_input.get("ftp_port")
-                if not isinstance(ftp_port, int):
-                    errors["ftp_port"] = "invalid_port"
-                    return self.async_show_form(
-                        step_id="user", data=self._get_schema(), errors=errors
-                    )
                 return self.async_create_entry(
                     title="SAVIIA Credentials", data=user_input
                 )
