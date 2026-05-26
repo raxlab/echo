@@ -33,8 +33,6 @@ class ServicesParams:
         {
             "sharepoint_tenant_name",
             "sharepoint_site_name",
-            "thies_ftp_server_avg_path",
-            "thies_ftp_server_ext_path",
             "sharepoint_avg_backup_folder_name",
             "sharepoint_ext_backup_folder_name",
             "local_backup_source_path",
@@ -173,8 +171,8 @@ class ConfigDefaultsParams:
         "Shared%20Documents/General/Test_Raspberry/THIES/EXT"
     )
 
-    DEFAULT_FTP_PATH_AVG = "ftp/thies/BINFILES/ARCH_AV1"
-    DEFAULT_FTP_PATH_EXT = "ftp/thies/BINFILES/ARCH_EX1"
+    DEFAULT_FTP_PATH_AVG = "/ARCH_AV1"
+    DEFAULT_FTP_PATH_EXT = "/ARCH_EX1"
 
     # - Local Backup
     DEFAULT_SHAREPOINT_BASE_URL = "/sites/uc365_CentrosyEstacionesRegionalesUC/Shared%20Documents/General/Test_Raspberry"

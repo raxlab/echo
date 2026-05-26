@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.exceptions import HomeAssistantError
 from saviialib import SaviiaAPI
 
-from custom_components.saviia.const import GeneralParams
+from custom_components.saviia.const import ConfigDefaultsParams, GeneralParams
 from custom_components.saviia.libs.log_client import (
     ErrorArgs,
     LogClient,
@@ -123,8 +123,8 @@ def _resolve_thies_call_data(
         "ftp_server_folders_path": call.data.get(
             "ftp_server_folders_path",
             [
-                config_data["thies_ftp_server_avg_path"],
-                config_data["thies_ftp_server_ext_path"],
+                ConfigDefaultsParams.DEFAULT_FTP_PATH_AVG,
+                ConfigDefaultsParams.DEFAULT_FTP_PATH_EXT,
             ],
         ),
         "local_backup_source_path": call.data.get(
