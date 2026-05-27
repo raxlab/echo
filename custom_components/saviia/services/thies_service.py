@@ -104,23 +104,16 @@ class ThiesService:
             api: SaviiaAPI = entry_data["api"]
             thies_service = api.get("thies")
 
-            local_backup_source_path = call.data["local_backup_source_path"]
-            n_days = call.data["n_days"]
-            db_driver = call.data.get("db_driver")
-            db_host = call.data.get("db_host")
-            db_name = call.data.get("db_name")
-            user = call.data.get("user")
-            pwd = call.data.get("pwd")
+            request_data: dict[str, object] = {
+                "local_backup_source_path": call.data["local_backup_source_path"],
+                "n_days": call.data["n_days"],
+            }
+            for key in ("db_driver", "db_host", "db_name", "user", "pwd"):
+                value = call.data.get(key)
+                if value is not None:
+                    request_data[key] = value
 
-            result = await thies_service.detect_failures(
-                local_backup_source_path=local_backup_source_path,
-                n_days=n_days,
-                db_driver=db_driver,
-                db_host=db_host,
-                db_name=db_name,
-                user=user,
-                pwd=pwd,
-            )
+            result = await thies_service.detect_failures(**request_data)
             results.append({"entry_id": config_entry.entry_id, **result})
 
         return _format_multi_entry_response(results)
