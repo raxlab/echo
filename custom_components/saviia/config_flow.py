@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers import selector
 import voluptuous as vol
 from homeassistant import config_entries
 
@@ -54,6 +55,25 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
     def _get_cloud_schema(self) -> vol.Schema:
         return vol.Schema(
             {
+                vol.Required("databricks_host_url"): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.URL)
+                ),
+                vol.Required("databricks_api_key"): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                ),
+                vol.Required("cloud_provider_destination_path"): str,
+            }
+        )
+
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:  # noqa: ARG002
+        """Collect Databricks settings for an existing SharePoint entry."""
+        return await self.async_step_reauth_confirm()
+
+    @staticmethod
+    def _validate_cloud_data(data: dict[str, Any]) -> None:
+        """Validate Databricks configuration on the backend."""
+        validation_schema = vol.Schema(
+            {
                 vol.Required("databricks_host_url"): cv.url,
                 vol.Required("databricks_api_key"): vol.All(
                     cv.string, vol.Length(min=1)
@@ -62,12 +82,11 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
                     cv.string,
                     vol.Match(r"^/Volumes/[^/]+/[^/]+/[^/]+(?:/.*)?$"),
                 ),
-            }
+            },
+            extra=vol.ALLOW_EXTRA,
         )
 
-    async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:  # noqa: ARG002
-        """Collect Databricks settings for an existing SharePoint entry."""
-        return await self.async_step_reauth_confirm()
+        validation_schema(data)
 
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
@@ -78,6 +97,7 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
         if user_input is not None:
             try:
                 cloud_data = self._get_cloud_schema()(user_input)
+                self._validate_cloud_data(cloud_data)
             except vol.Invalid:
                 errors["base"] = "invalid_schema"
             else:
@@ -102,8 +122,12 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
         errors = {}
         if user_input is not None:
             try:
+                data = self._get_schema()(user_input)
+                self._validate_cloud_data(data)
+
                 return self.async_create_entry(
-                    title="SAVIIA Credentials", data=self._get_schema()(user_input)
+                    title="SAVIIA Credentials",
+                    data=data,
                 )
             except ValueError as e:
                 logclient.error(
