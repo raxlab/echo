@@ -107,11 +107,11 @@ def _resolve_thies_call_data(
     config_entry: ConfigEntry, call: ServiceCall
 ) -> dict[str, Any]:
     config_data = config_entry.data
-    sharepoint_destination_path = call.data.get(
-        "sharepoint_destination_path"
-    ) or config_data.get("sharepoint_avg_backup_folder_name")
-    if not sharepoint_destination_path:
-        msg = "No SharePoint destination path available for the THIES service"
+    cloud_provider_destination_path = call.data.get(
+        "cloud_provider_destination_path"
+    ) or config_data.get("cloud_provider_destination_path")
+    if not cloud_provider_destination_path:
+        msg = "No Databricks destination path available for the THIES service"
         raise HomeAssistantError(msg)
 
     return {
@@ -119,17 +119,13 @@ def _resolve_thies_call_data(
         "ftp_host": call.data["ftp_host"],
         "ftp_user": call.data["ftp_user"],
         "ftp_password": call.data["ftp_password"],
-        "sharepoint_destination_path": sharepoint_destination_path,
+        "cloud_provider_destination_path": cloud_provider_destination_path,
         "ftp_server_folders_path": call.data.get(
             "ftp_server_folders_path",
             [
                 ConfigDefaultsParams.DEFAULT_FTP_PATH_AVG,
                 ConfigDefaultsParams.DEFAULT_FTP_PATH_EXT,
             ],
-        ),
-        "local_backup_source_path": call.data.get(
-            "local_backup_source_path",
-            config_data["local_backup_source_path"],
         ),
     }
 

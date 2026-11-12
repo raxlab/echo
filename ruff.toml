@@ -8,6 +8,7 @@ select = [
 ]
 
 ignore = [
+    "CPY001", # Copyright is covered by the repository LICENSE.
     "ANN204", # Missing type annotation for `cls` in class method
     "ANN001", # Missing type annotation for `self` in method
     "ANN401", # Dynamically typed expressions (typing.Any) are disallowed
@@ -44,3 +45,6 @@ keep-runtime-typing = true
 
 [lint.mccabe]
 max-complexity = 25
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "SLF001", "PLR2004"]
