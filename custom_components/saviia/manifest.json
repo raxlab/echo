@@ -16,5 +16,5 @@
     "requirements": [
         "saviialib==1.21.0"
     ],
-    "version": "8.0.0"
+    "version": "8.0.1"
 }
