@@ -10,7 +10,44 @@
         },
         "export_files": {
             "name": "Exportar archivos",
-            "description": "Sincroniza una carpeta local bajo el backup configurado con SharePoint."
+            "description": "Sincroniza una carpeta local bajo la raíz de respaldo configurada con Databricks."
+        }
+    },
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configurar SAVIIA",
+                "data": {
+                    "databricks_host_url": "URL del workspace de Databricks",
+                    "databricks_api_key": "Token de API de Databricks",
+                    "cloud_provider_destination_path": "Destino en Databricks (/Volumes/catalog/schema/volume)",
+                    "local_backup_source_path": "Raíz del respaldo local",
+                    "latitude": "Latitud",
+                    "longitude": "Longitud",
+                    "bot_token": "Token del bot de Discord",
+                    "task_channel_id": "ID del canal de tareas de Discord",
+                    "email_address": "Correo para notificaciones",
+                    "email_password": "Contraseña de aplicación del correo"
+                }
+            },
+            "reauth_confirm": {
+                "title": "Configurar Databricks",
+                "description": "Ingresa la URL del workspace, el token y el destino en Databricks. Se conservarán el respaldo local y las notificaciones. Las rutas de SharePoint no se convierten automáticamente.",
+                "data": {
+                    "databricks_host_url": "URL del workspace de Databricks",
+                    "databricks_api_key": "Token de API de Databricks",
+                    "cloud_provider_destination_path": "Destino en Databricks (/Volumes/catalog/schema/volume)"
+                }
+            }
+        },
+        "error": {
+            "invalid_input": "Datos no válidos.",
+            "invalid_schema": "Revisa la URL, el token y la ruta /Volumes/catalog/schema/volume.",
+            "os_error": "Error del sistema operativo.",
+            "runtime_error": "Error inesperado de configuración."
+        },
+        "abort": {
+            "reauth_successful": "Configuración de Databricks actualizada."
         }
     }
 }

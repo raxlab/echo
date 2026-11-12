@@ -17,51 +17,66 @@ Home Assistant integration for remote data extraction, processing, and orchestra
 
 ## Service Configuration
 
-ECHO enables automated data extraction from THIES stations, local processing, cloud backup (SharePoint), and alert/task orchestration.
+ECHO 8.0.0 uses `saviialib==1.21.0` for THIES extraction, local backups,
+Databricks synchronization, and alert/task orchestration.
 
-During setup, you will be prompted to provide the following parameters:
+### Databricks configuration
 
-### SharePoint Configuration (Cloud Backup)
+- **databricks_host_url**: Workspace URL, e.g. `https://your-workspace.azuredatabricks.net`.
+- **databricks_api_key**: API token with access to the destination volume.
+- **cloud_provider_destination_path**: Volume base path, e.g. `/Volumes/catalog/schema/volume`.
+- **local_backup_source_path**: Existing local backup root, e.g. `/media/backup_local`.
 
-1. **sharepoint_client_id**: Application Client ID.
-2. **sharepoint_client_secret**: Application Client Secret.
-3. **sharepoint_tenant_id**: Microsoft 365 Tenant ID.
-4. **sharepoint_tenant_name**: Organization tenant name (e.g., `myorg`).
-5. **sharepoint_site_name**: SharePoint site name.
+The integration also accepts **latitude**, **longitude**, **bot_token**,
+**task_channel_id**, **email_address**, and **email_password** for camera scheduling,
+Discord tasks, and Gmail SMTP notifications. Cloud credentials are not returned by
+`saviia.get_config_value`.
 
+### Upgrading from SharePoint
 
-### Data Paths & Backup
+After installing 8.0.0 and restarting Home Assistant, existing SharePoint entries
+request new Databricks settings through the integration's reauthentication dialog.
+Enter the workspace URL, token, and volume base path. The existing entry is updated;
+its local backup path, location, Discord/email settings, and entry ID are retained.
+Old SharePoint settings are removed after submission. Existing cloud files are not
+moved or copied by this configuration step.
 
-6. **sharepoint_avg_backup_folder_name**: Destination folder for average data in SharePoint.
-7. **sharepoint_ext_backup_folder_name**: Destination folder for extended data in SharePoint.
-8. **local_backup_source_path**: Local directory used as backup source.
-9. **sharepoint_backup_base_url**: Base URL for SharePoint backups.
+Update automations as follows:
 
+- Replace `sharepoint_destination_path` with `cloud_provider_destination_path`
+  in `get_thies_data`, `post_thies_data`, and `export_files`. Omit it to use the
+  configured volume base path.
+- Remove `local_backup_source_path` from `post_thies_data`: version 1.21.0 uses
+  the local root configured on the API. The separate `detect_failures` action
+  still accepts its own local path.
+- Read sync flags from `response.metadata.data.need_to_sync` and
+  `response.metadata.data.need_to_backup`. If either flag is omitted from
+  `post_thies_data`, the integration fetches the status and fills it in;
+  explicit `false` values are retained. A failed status lookup stops the action.
 
-### Location Configuration 
+Example export action:
 
-10. **latitude**: Latitude of the station.
-11. **longitude**: Longitude of the station.
+```yaml
+action: saviia.export_files
+data:
+  local_folder_path: thies/EXT
+  cloud_provider_destination_path: /Volumes/catalog/schema/volume
+```
 
-Used for georeferencing, contextual analysis, and future location-based features.
+THIES appends `<backup-root-name>/thies/AVG` and `<backup-root-name>/thies/EXT`
+to the volume base path. For example, `/media/backup_local` produces
+`/Volumes/catalog/schema/volume/backup_local/thies/AVG`.
+In saviialib 1.21.0, `export_files` instead appends the resolved local path with
+its leading slash removed: the example above with `/media/backup_local`
+exports to `/Volumes/catalog/schema/volume/media/backup_local/thies/EXT`.
+These layouts differ when the local backup root is absolute; choose destinations
+accordingly to avoid duplicate cloud trees. This integration does not change the
+library's path construction.
 
-
-###  Task & Alert System
-
-ECHO integrates with external services to generate alerts and manage operational tasks.
-
-12. **bot_token**: Discord bot token used for sending alerts via the task system (e.g., Xavia Live).
-13. **task_channel_id**: Discord channel ID where alerts and tasks will be posted.
-
-
-### Email Notifications 
-
-14. **email_address**: Email address used to send alerts and task notifications.
-15. **email_password**: Application password (e.g., Google App Password).
-
-> ⚠️ Note: Email delivery is currently configured for Gmail SMTP.
-
-
+The automatic THIES status lookup in 1.21.0 inspects `/ARCH_AV1` and `/ARCH_EX1`.
+Custom `ftp_server_folders_path` values apply to the post operation; the status
+API does not accept a folder override. For custom FTP layouts, supply both flags
+explicitly or adjust the library before relying on automatic planning.
 
 ## Activating Debugging
 

@@ -10,7 +10,44 @@
         },
         "export_files": {
             "name": "Export Files",
-            "description": "Synchronizes a local folder under the configured backup root with SharePoint."
+            "description": "Synchronizes a local folder under the configured backup root with Databricks."
+        }
+    },
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configure SAVIIA",
+                "data": {
+                    "databricks_host_url": "Databricks workspace URL",
+                    "databricks_api_key": "Databricks API token",
+                    "cloud_provider_destination_path": "Databricks volume destination (/Volumes/catalog/schema/volume)",
+                    "local_backup_source_path": "Local backup root",
+                    "latitude": "Latitude",
+                    "longitude": "Longitude",
+                    "bot_token": "Discord bot token",
+                    "task_channel_id": "Discord task channel ID",
+                    "email_address": "Notification email address",
+                    "email_password": "Notification email application password"
+                }
+            },
+            "reauth_confirm": {
+                "title": "Configure Databricks",
+                "description": "Provide the Databricks workspace URL, token and volume destination. Local backup and notification settings will be retained. SharePoint paths cannot be converted automatically.",
+                "data": {
+                    "databricks_host_url": "Databricks workspace URL",
+                    "databricks_api_key": "Databricks API token",
+                    "cloud_provider_destination_path": "Databricks volume destination (/Volumes/catalog/schema/volume)"
+                }
+            }
+        },
+        "error": {
+            "invalid_input": "Invalid input.",
+            "invalid_schema": "Check the URL, token and /Volumes/catalog/schema/volume path.",
+            "os_error": "Operating system error.",
+            "runtime_error": "Unexpected setup error."
+        },
+        "abort": {
+            "reauth_successful": "Databricks settings updated."
         }
     }
 }

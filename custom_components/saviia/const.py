@@ -31,12 +31,9 @@ class ServicesParams:
 
     ALLOWED_CONFIG_KEYS = frozenset(
         {
-            "sharepoint_tenant_name",
-            "sharepoint_site_name",
-            "sharepoint_avg_backup_folder_name",
-            "sharepoint_ext_backup_folder_name",
+            "databricks_host_url",
+            "cloud_provider_destination_path",
             "local_backup_source_path",
-            "sharepoint_backup_base_url",
             "latitude",
             "longitude",
         }
@@ -49,7 +46,7 @@ class ServicesParams:
             vol.Required("ftp_host"): cv.string,
             vol.Required("ftp_user"): cv.string,
             vol.Required("ftp_password"): cv.string,
-            vol.Optional("sharepoint_destination_path"): cv.string,
+            vol.Optional("cloud_provider_destination_path"): cv.string,
         }
     )
 
@@ -57,7 +54,7 @@ class ServicesParams:
     SERVICE_EXPORT_FILES_SCHEMA = vol.Schema(
         {
             vol.Required("local_folder_path"): cv.string,
-            vol.Optional("sharepoint_destination_path"): cv.string,
+            vol.Optional("cloud_provider_destination_path"): cv.string,
         }
     )
 
@@ -70,9 +67,8 @@ class ServicesParams:
             vol.Required("ftp_password"): cv.string,
             vol.Optional("need_to_sync"): bool,
             vol.Optional("need_to_backup"): bool,
-            vol.Optional("sharepoint_destination_path"): cv.string,
+            vol.Optional("cloud_provider_destination_path"): cv.string,
             vol.Optional("ftp_server_folders_path"): list,
-            vol.Optional("local_backup_source_path"): cv.string,
         }
     )
 
@@ -164,16 +160,8 @@ class ConfigDefaultsParams:
     """Config flow default parameters."""
 
     # - THIES Data Logger Synchronization
-    DEFAULT_SHAREPOINT_THIES_AVG_FOLDER = (
-        "Shared%20Documents/General/Test_Raspberry/THIES/AVG"
-    )
-    DEFAULT_SHAREPOINT_THIES_EXT_FOLDER = (
-        "Shared%20Documents/General/Test_Raspberry/THIES/EXT"
-    )
-
     DEFAULT_FTP_PATH_AVG = "/ARCH_AV1"
     DEFAULT_FTP_PATH_EXT = "/ARCH_EX1"
 
     # - Local Backup
-    DEFAULT_SHAREPOINT_BASE_URL = "/sites/uc365_CentrosyEstacionesRegionalesUC/Shared%20Documents/General/Test_Raspberry"
     DEFAULT_LOCAL_BACKUP_PATH = "/media/backup_local"

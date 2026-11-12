@@ -24,9 +24,9 @@ get_thies_data:
       required: true
       selector:
         text:
-    sharepoint_destination_path:
-      name: SharePoint destination override
-      description: "Defaults to the configured THIES AVG backup folder."
+    cloud_provider_destination_path:
+      name: Databricks destination override
+      description: "Defaults to the configured Databricks volume destination."
       required: false
       selector:
         text:
@@ -67,8 +67,8 @@ post_thies_data:
       required: false
       selector:
         boolean:
-    sharepoint_destination_path:
-      name: SharePoint destination override
+    cloud_provider_destination_path:
+      name: Databricks destination override
       required: false
       selector:
         text:
@@ -77,11 +77,6 @@ post_thies_data:
       required: false
       selector:
         object:
-    local_backup_source_path:
-      name: Local backup source override
-      required: false
-      selector:
-        text:
 
 detect_failures:
   name: "Detect failures from Thies Sensors"
@@ -127,7 +122,7 @@ detect_failures:
 
 export_files:
   name: "Export Files"
-  description: "Synchronizes a local folder under the configured backup root with SharePoint."
+  description: "Synchronizes a local folder under the configured backup root with Databricks."
   fields:
     local_folder_path:
       name: Local folder path
@@ -135,8 +130,8 @@ export_files:
       required: true
       selector:
         text:
-    sharepoint_destination_path:
-      name: SharePoint destination override
+    cloud_provider_destination_path:
+      name: Databricks destination override
       required: false
       selector:
         text:

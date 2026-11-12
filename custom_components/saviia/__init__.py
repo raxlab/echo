@@ -7,6 +7,7 @@ from homeassistant.components.frontend import async_register_built_in_panel
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from saviialib import SaviiaAPI, SaviiaAPIConfig
 
 from custom_components.saviia.const import GeneralParams
@@ -55,13 +56,21 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     """Set up coordinator from a config entry."""
     logclient.method_name = "async_setup_entry"
     logclient.debug(DebugArgs(status=LogStatus.STARTED))
+    if any(
+        not config_entry.data.get(key)
+        for key in (
+            "databricks_host_url",
+            "databricks_api_key",
+            "cloud_provider_destination_path",
+        )
+    ):
+        msg = "Configure the Databricks host, token and volume destination to continue"
+        raise ConfigEntryAuthFailed(msg)
+
     api = SaviiaAPI(
         SaviiaAPIConfig(
-            sharepoint_client_id=config_entry.data["sharepoint_client_id"],
-            sharepoint_client_secret=config_entry.data["sharepoint_client_secret"],
-            sharepoint_tenant_id=config_entry.data["sharepoint_tenant_id"],
-            sharepoint_tenant_name=config_entry.data["sharepoint_tenant_name"],
-            sharepoint_site_name=config_entry.data["sharepoint_site_name"],
+            databricks_host_url=config_entry.data["databricks_host_url"],
+            databricks_api_key=config_entry.data["databricks_api_key"],
             logger=GeneralParams.LOGGER,
             latitude=config_entry.data.get("latitude"),
             longitude=config_entry.data.get("longitude"),

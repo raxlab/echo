@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from http import HTTPStatus
+
 from homeassistant.core import ServiceCall, ServiceResponse
+from homeassistant.exceptions import HomeAssistantError
 from saviialib import SaviiaAPI
 
 from custom_components.saviia.libs.log_client import (
@@ -43,7 +46,9 @@ class ThiesService:
                 ftp_host=request_data["ftp_host"],
                 ftp_user=request_data["ftp_user"],
                 ftp_password=request_data["ftp_password"],
-                sharepoint_destination_path=request_data["sharepoint_destination_path"],
+                cloud_provider_destination_path=request_data[
+                    "cloud_provider_destination_path"
+                ],
             )
             results.append({"entry_id": config_entry.entry_id, **result})
 
@@ -69,14 +74,21 @@ class ThiesService:
                     ftp_host=request_data["ftp_host"],
                     ftp_user=request_data["ftp_user"],
                     ftp_password=request_data["ftp_password"],
-                    sharepoint_destination_path=request_data[
-                        "sharepoint_destination_path"
+                    cloud_provider_destination_path=request_data[
+                        "cloud_provider_destination_path"
                     ],
                 )
+                status_data = status_result.get("metadata", {}).get("data", {})
+                if status_result.get("status") != HTTPStatus.OK or any(
+                    not isinstance(status_data.get(key), bool)
+                    for key in ("need_to_sync", "need_to_backup")
+                ):
+                    msg = "Unable to determine THIES sync/backup status; no work was started"
+                    raise HomeAssistantError(msg)
                 if need_to_sync is None:
-                    need_to_sync = status_result.get("need_to_sync", False)
+                    need_to_sync = status_data["need_to_sync"]
                 if need_to_backup is None:
-                    need_to_backup = status_result.get("need_to_backup", False)
+                    need_to_backup = status_data["need_to_backup"]
 
             result = await thies_service.post_thies_data(
                 ftp_port=request_data["ftp_port"],
@@ -85,9 +97,10 @@ class ThiesService:
                 ftp_password=request_data["ftp_password"],
                 need_to_sync=bool(need_to_sync),
                 need_to_backup=bool(need_to_backup),
-                sharepoint_destination_path=request_data["sharepoint_destination_path"],
+                cloud_provider_destination_path=request_data[
+                    "cloud_provider_destination_path"
+                ],
                 ftp_server_folders_path=request_data["ftp_server_folders_path"],
-                local_backup_source_path=request_data["local_backup_source_path"],
             )
             results.append({"entry_id": config_entry.entry_id, **result})
 

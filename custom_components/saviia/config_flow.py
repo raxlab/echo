@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING, Any
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.data_entry_flow import FlowResult
 
-from custom_components.saviia.const import GeneralParams
+from custom_components.saviia.const import ConfigDefaultsParams, GeneralParams
 
 if TYPE_CHECKING:
     from homeassistant.data_entry_flow import FlowResult
@@ -36,27 +35,11 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
     def _get_schema(self) -> vol.Schema:
         return vol.Schema(
             {
+                **self._get_cloud_schema().schema,
                 vol.Required(
-                    "sharepoint_client_id",
-                ): str,
-                vol.Required(
-                    "sharepoint_client_secret",
-                ): str,
-                vol.Required(
-                    "sharepoint_tenant_id",
-                ): str,
-                vol.Required(
-                    "sharepoint_tenant_name",
-                ): str,
-                vol.Required(
-                    "sharepoint_site_name",
-                ): str,  # THIES Data Logger Parameters
-                vol.Required("sharepoint_avg_backup_folder_name"): str,
-                vol.Required(
-                    "sharepoint_ext_backup_folder_name"
-                ): str,  # Local Backup Parameters
-                vol.Required("local_backup_source_path"): str,
-                vol.Required("sharepoint_backup_base_url"): str,
+                    "local_backup_source_path",
+                    default=ConfigDefaultsParams.DEFAULT_LOCAL_BACKUP_PATH,
+                ): cv.string,
                 vol.Optional("latitude"): cv.latitude,
                 vol.Optional("longitude"): cv.longitude,
                 # Task Creation Parameters
@@ -68,6 +51,50 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
             }
         )
 
+    def _get_cloud_schema(self) -> vol.Schema:
+        return vol.Schema(
+            {
+                vol.Required("databricks_host_url"): cv.url,
+                vol.Required("databricks_api_key"): vol.All(
+                    cv.string, vol.Length(min=1)
+                ),
+                vol.Required("cloud_provider_destination_path"): vol.All(
+                    cv.string,
+                    vol.Match(r"^/Volumes/[^/]+/[^/]+/[^/]+(?:/.*)?$"),
+                ),
+            }
+        )
+
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> FlowResult:  # noqa: ARG002
+        """Collect Databricks settings for an existing SharePoint entry."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Update the same entry, retaining local paths and notification settings."""
+        entry = self._get_reauth_entry()
+        errors = {}
+        if user_input is not None:
+            try:
+                cloud_data = self._get_cloud_schema()(user_input)
+            except vol.Invalid:
+                errors["base"] = "invalid_schema"
+            else:
+                data = {
+                    key: value
+                    for key, value in entry.data.items()
+                    if not key.startswith("sharepoint_")
+                }
+                data.update(cloud_data)
+                return self.async_update_reload_and_abort(entry, data=data)
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=self._get_cloud_schema(),
+            errors=errors,
+        )
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -76,7 +103,7 @@ class SaviiaConfigFlow(config_entries.ConfigFlow, domain=GeneralParams.DOMAIN):
         if user_input is not None:
             try:
                 return self.async_create_entry(
-                    title="SAVIIA Credentials", data=user_input
+                    title="SAVIIA Credentials", data=self._get_schema()(user_input)
                 )
             except ValueError as e:
                 logclient.error(
